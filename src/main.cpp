@@ -1,40 +1,38 @@
 #include <WiFi.h>
 #include <FirebaseESP32.h>
 
-//Provide the token generation process info.
+// Provide the token generation process info.
 #include <addons/TokenHelper.h>
 
-//Provide the RTDB payload printing info and other helper functions.
+// Provide the RTDB payload printing info and other helper functions.
 #include <addons/RTDBHelper.h>
 
 /* 1. Define the WiFi credentials */
 #define WIFI_SSID "F3"
 #define WIFI_PASSWORD "wifi@f3_"
 
-//For the following credentials, see examples/Authentications/SignInAsUser/EmailPassword/EmailPassword.ino
+// For the following credentials, see examples/Authentications/SignInAsUser/EmailPassword/EmailPassword.ino
 
 /* 2. Define the API Key */
-#define API_KEY "NM8xquRlr85jG7AgPXgP83KLLqdBy6TrMCnVoihE"
+#define API_KEY ""
 
 /* 3. Define the RTDB URL */
-#define DATABASE_URL "https://esp-32-92291-default-rtdb.firebaseio.com/" //<databaseName>.firebaseio.com or <databaseName>.<region>.firebasedatabase.app
+#define DATABASE_URL "" //<databaseName>.firebaseio.com or <databaseName>.<region>.firebasedatabase.app
 
-
-//Define Firebase Data object
+// Define Firebase Data object
 FirebaseData fbdo;
 
 FirebaseAuth auth;
 FirebaseConfig config;
 
-
 int a, b, x, y;
-
 
 void setup()
 {
 
   Serial.begin(115200);
-delay(2000);
+  delay(2000);
+  pinMode(2, OUTPUT);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED)
@@ -54,53 +52,54 @@ delay(2000);
 
   config.database_url = DATABASE_URL;
 
-
-
   //////////////////////////////////////////////////////////////////////////////////////////////
-  //Please make sure the device free Heap is not lower than 80 k for ESP32 and 10 k for ESP8266,
-  //otherwise the SSL connection will fail.
+  // Please make sure the device free Heap is not lower than 80 k for ESP32 and 10 k for ESP8266,
+  // otherwise the SSL connection will fail.
   //////////////////////////////////////////////////////////////////////////////////////////////
 
   Firebase.begin(DATABASE_URL, API_KEY);
 
-  //Comment or pass false value when WiFi reconnection will control by your code or third party library
- // Firebase.reconnectWiFi(true);
+  // Comment or pass false value when WiFi reconnection will control by your code or third party library
+  // Firebase.reconnectWiFi(true);
 
   Firebase.setDoubleDigits(5);
-
 }
 
 void loop()
 {
- 
-  
-    x=random(0,9);
-    y=random(10,19);
-    
-  if (Firebase.ready()) 
+
+  // x = random(0, 9);
+  // y = random(10, 19);
+
+  if (Firebase.ready())
   {
-    
-    //Firebase.setInt(fbdo, main, 5);
-    Firebase.setInt(fbdo, "/test/a", x);
-    Firebase.setInt(fbdo, "/test/b", y);
+
+    // set data in firebase
+    // Firebase.setInt(fbdo, "/test/a", x);
+    // Firebase.setInt(fbdo, "/test/b", y);
     delay(200);
 
     Serial.printf("Get int a--  %s\n", Firebase.getInt(fbdo, "/test/a") ? String(fbdo.to<int>()).c_str() : fbdo.errorReason().c_str());
-     a=fbdo.to<int>();
+    a = fbdo.to<int>();
     Serial.printf("Get int b--  %s\n", Firebase.getInt(fbdo, "/test/b") ? String(fbdo.to<int>()).c_str() : fbdo.errorReason().c_str());
-     b=fbdo.to<int>();
+    b = fbdo.to<int>();
 
-  Serial.println();  
-  Serial.print("a:");
-  Serial.print(a);
-  Serial.print("  b: ");
-  Serial.print(b);
-  
-  Serial.println();
-  Serial.println("------------------");
-  Serial.println();
-  
+    if(a % 2 == 0) {
+      digitalWrite(2, HIGH);
+    } else {
+      digitalWrite(2, LOW);
+    }
 
-  delay(2500);
+    Serial.println();
+    Serial.print("a:");
+    Serial.print(a);
+    Serial.print("  b: ");
+    Serial.print(b);
+
+    Serial.println();
+    Serial.println("------------------");
+    Serial.println();
+
+    delay(2500);
   }
 }
